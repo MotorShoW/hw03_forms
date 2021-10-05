@@ -52,7 +52,7 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    user_posts = Post.objects.filter(author_id=post.author)
+    user_posts = post.author.posts.all()
     posts_count = user_posts.count()
     post_title = post.text[:30]
     context = {
@@ -66,7 +66,6 @@ def post_detail(request, post_id):
 
 @login_required
 def post_create(request):
-    group = Group.objects.all()
     form = PostForm(request.POST or None)
     if form.is_valid():
         post = form.save(commit=False)
@@ -75,7 +74,6 @@ def post_create(request):
         return redirect('posts:profile', username=request.user.username)
     context = {
         'form': form,
-        'group': group,
     }
     return render(request, 'posts/create_post.html', context)
 
@@ -83,19 +81,16 @@ def post_create(request):
 @login_required
 def post_edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    group = Group.objects.all()
     if request.user != post.author:
         return redirect('posts:post_detail', post_id)
     form = PostForm(request.POST or None, instance=post)
     if form.is_valid():
         post = form.save()
-        post.author = request.user
         post.save()
         return redirect('posts:post_detail', post_id)
     context = {
         'post': post,
         'form': form,
-        'group': group,
         'is_edit': True,
     }
     return render(request, 'posts/create_post.html', context)
