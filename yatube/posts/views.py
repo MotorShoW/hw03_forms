@@ -86,7 +86,6 @@ def post_edit(request, post_id):
     form = PostForm(request.POST or None, instance=post)
     if form.is_valid():
         post = form.save()
-        post.save()
         return redirect('posts:post_detail', post_id)
     context = {
         'post': post,
